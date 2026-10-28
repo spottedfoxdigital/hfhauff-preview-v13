@@ -111,8 +111,14 @@ async function handleContact(req: Request, server: any): Promise<Response> {
 }
 
 // ---------- indexing (see README-DEPLOY.md) ----------
-export function indexingAllowed(req: Request): boolean {
-  return false;
+// Noindex is ON by default everywhere (X-Robots-Tag header + <meta name="robots"> + robots.txt Disallow).
+// It turns OFF only when BOTH are true: ALLOW_INDEX === "1" in the environment AND the request Host is
+// exactly INDEX_HOST (default www.hfhauff.com). *.up.railway.app, the apex, and localhost stay noindex.
+const INDEX_HOST = (process.env.INDEX_HOST || "www.hfhauff.com").toLowerCase();
+export function indexingAllowed(req: Request, env = process.env): boolean {
+  if (env.ALLOW_INDEX !== "1") return false;
+  const host = (req.headers.get("host") || "").toLowerCase().replace(/:\d+$/, "").replace(/\.$/, "");
+  return host === INDEX_HOST;
 }
 
 // ---------- static files ----------
