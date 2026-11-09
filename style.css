@@ -100,3 +100,11 @@ html,body{overflow-x:clip}
 .hfh-nums{display:grid;gap:16px;max-width:820px;margin:30px auto 0}.hfh-num{display:flex;gap:18px;align-items:flex-start;background:#fff;border-radius:8px;border-left:4px solid var(--b);padding:20px 24px;box-shadow:0 10px 30px rgba(0,0,0,.07)}
 .hfh-num>b{flex:0 0 40px;height:40px;border-radius:50%;background:var(--r);color:#fff;font:800 1.1rem/40px Montserrat;text-align:center}.hfh-num h3{margin:0 0 4px;font-size:1.1rem}.hfh-num p{margin:0}
 .hfh-cpts b{display:block;font:700 1.1rem Montserrat;margin-bottom:4px}
+
+/* v15 additions: PDF downloads */
+.hfh-docsh{margin:28px 0 0;font-size:1.05rem}
+.hfh-docs{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:10px}
+.hfh-docs a{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--g3);border-left:4px solid var(--b);border-radius:6px;padding:12px 16px;text-decoration:none;color:var(--d);font-weight:600;line-height:1.35}
+.hfh-docs a:hover{border-color:var(--b)}
+.hfh-docs a::before{content:"PDF";flex:0 0 auto;font:700 11px Montserrat;letter-spacing:.06em;color:#fff;background:var(--r);border-radius:3px;padding:4px 7px}
+.hfh-docs small{display:block;font-weight:400;color:var(--g);font-size:13px;margin-top:2px}
