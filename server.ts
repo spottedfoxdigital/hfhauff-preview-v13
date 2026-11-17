@@ -10,7 +10,7 @@ const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8",
   ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif",
   ".svg": "image/svg+xml", ".ico": "image/x-icon", ".txt": "text/plain; charset=utf-8", ".xml": "application/xml",
-  ".pdf": "application/pdf", ".woff2": "font/woff2",
+  ".pdf": "application/pdf", ".woff2": "font/woff2", ".mp4": "video/mp4",
 };
 
 // ---------- contact form ----------
@@ -153,7 +153,24 @@ async function serveStatic(req: Request, url: URL): Promise<Response> {
     if (isThanks) headers["X-Robots-Tag"] = "noindex"; // always noindex
     return new Response(html, { headers: { ...headers, "Content-Type": TYPES[".html"], "Cache-Control": isThanks ? "no-store" : "public, max-age=600" } });
   }
-  return new Response(Bun.file(f), { headers: { ...headers, "Content-Type": TYPES[ext], "Cache-Control": "public, max-age=86400" } });
+  const file = Bun.file(f);
+  const base = { ...headers, "Content-Type": TYPES[ext], "Cache-Control": "public, max-age=86400", "Accept-Ranges": "bytes" };
+  // Byte ranges: Safari will not play video without 206 responses.
+  const range = req.headers.get("range");
+  if (range) {
+    const size = file.size;
+    const m = /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+    if (m && (m[1] !== "" || m[2] !== "")) {
+      let start: number, end: number;
+      if (m[1] === "") { start = Math.max(0, size - Number(m[2])); end = size - 1; }
+      else { start = Number(m[1]); end = m[2] === "" ? size - 1 : Math.min(Number(m[2]), size - 1); }
+      if (start <= end && start < size) {
+        return new Response(file.slice(start, end + 1), { status: 206, headers: { ...base, "Content-Range": `bytes ${start}-${end}/${size}`, "Content-Length": String(end - start + 1) } });
+      }
+      return new Response(null, { status: 416, headers: { ...headers, "Content-Range": `bytes */${size}` } });
+    }
+  }
+  return new Response(file, { headers: base });
 }
 
 if (import.meta.main) {
