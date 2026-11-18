@@ -13,6 +13,72 @@ const TYPES: Record<string, string> = {
   ".pdf": "application/pdf", ".woff2": "font/woff2", ".mp4": "video/mp4",
 };
 
+// ---------- old-site redirects ----------
+// Pages of the pre-2026 hfhauff.com (from the Wayback Machine, 2026-11-18). Keys are lowercase, no trailing slash.
+const REDIRECTS: Record<string, string> = {
+  "/aboutus": "/about.html",
+  "/affiliates": "/dealers.html",
+  "/auto-start.php": "/wind-machines.html",
+  "/blades.php": "/wind-machines.html",
+  "/chinook-dealers.php": "/dealers.html",
+  "/chinook-form.php": "/contact.html",
+  "/chinook-gallery.php": "/wind-machines.html",
+  "/chinook-parts.php": "/contact.html",
+  "/chinook-testimonials.php": "/wind-machines.html",
+  "/component/xmap": "/",
+  "/concrete-pads.php": "/wind-machines.html",
+  "/contact": "/contact.html",
+  "/contact.php": "/contact.html",
+  "/dealer-home.php": "/dealers.html",
+  "/engines.php": "/wind-machines.html",
+  "/gear-drives.php": "/wind-machines.html",
+  "/history.php": "/about.html",
+  "/index.php": "/",
+  "/lobby.php": "/dealers.html",
+  "/newsletter": "/",
+  "/newsletter/newsletter1": "/",
+  "/newsletter/newsletter2": "/",
+  "/newsletter/newsletter3": "/",
+  "/newsletter/newsletter7": "/",
+  "/products": "/",
+  "/products/3-pt": "/sprayers.html",
+  "/products/chinook-wind-machines": "/wind-machines.html",
+  "/products/other-products": "/sprayers.html",
+  "/products/other-products/pumps": "/sprayers.html",
+  "/products/other-products/telemetry": "/altrac.html",
+  "/products/other-products/weedbooms": "/sprayers.html",
+  "/products/trail-tanks": "/sprayers.html",
+  "/products/victair-mistifier": "/sprayers.html",
+  "/publications": "/wind-machines.html",
+  "/publications/65-frost": "/wind-machines.html",
+  "/sales": "/contact.html",
+  "/sales-contact.php": "/contact.html",
+  "/sales/literature": "/wind-machines.html",
+  "/sales/literature/chinook-literature": "/wind-machines.html",
+  "/sales/literature/victair-literature": "/sprayers.html",
+  "/sales/quote-request": "/contact.html",
+  "/sales/sales-staff": "/contact.html",
+  "/sales/sales-staff/chinook-wind-machine-dealers": "/dealers.html",
+  "/sales/sales-staff/victair-sprayers": "/dealers.html",
+  "/sales/testimonials": "/",
+  "/service": "/contact.html",
+  "/towers.php": "/wind-machines.html",
+  "/user-login.php": "/",
+  "/user-password-request.php": "/",
+  "/victair-dealers.php": "/dealers.html",
+  "/victair-form.php": "/contact.html",
+  "/victair-gallery.php": "/sprayers.html",
+  "/victair-gardensprayer.php": "/sprayers.html",
+  "/victair-mistifiers.php": "/sprayers.html",
+  "/victair-pacmule.php": "/sprayers.html",
+  "/victair-parts.php": "/contact.html",
+  "/victair-testimonials.php": "/sprayers.html",
+  "/victair-trailtanks.php": "/sprayers.html",
+  "/videos": "/sprayers.html",
+  "/videos.php": "/sprayers.html",
+  "/weed-booms.php": "/sprayers.html",
+};
+
 // ---------- contact form ----------
 export function formEnabled(env = process.env): boolean {
   return Boolean(env.RESEND_API_KEY && env.CONTACT_TO && env.CONTACT_FROM);
@@ -139,6 +205,8 @@ async function serveStatic(req: Request, url: URL): Promise<Response> {
   const allowIndex = indexingAllowed(req);
   const headers: Record<string, string> = {};
   if (!allowIndex) headers["X-Robots-Tag"] = "noindex, nofollow";
+  const legacy = REDIRECTS[url.pathname.toLowerCase().replace(/\/+$/, "")];
+  if (legacy) return new Response(null, { status: 301, headers: { ...headers, Location: legacy } });
   if (url.pathname === "/thank-you") return new Response(null, { status: 301, headers: { Location: "/thank-you/" } });
   if (url.pathname === "/robots.txt" && allowIndex) {
     return new Response("User-agent: *\nAllow: /\n", { headers: { "Content-Type": TYPES[".txt"] } });
